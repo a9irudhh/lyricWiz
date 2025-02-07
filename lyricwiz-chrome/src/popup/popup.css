@@ -1,0 +1,19 @@
+.container {
+    width: 300px;
+    padding: 15px;
+    text-align: center;
+}
+
+#websiteTitle {
+    font-size: 18px;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    word-wrap: break-word;
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 15px;
+}
