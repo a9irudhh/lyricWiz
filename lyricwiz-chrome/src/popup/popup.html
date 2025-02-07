@@ -6,22 +6,23 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Website Title</title>
         <script src="popup.js" defer></script>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                padding: 10px;
-                text-align: center;
-            }
-
-            h2 {
-                font-size: 16px;
-                color: #333;
-            }
-        </style>
+        <link rel="stylesheet" href="popup.css">
     </head>
 
     <body>
-        <h2>Loading...</h2>
+
+        <div class="api-container">
+            <h2 class="title">Genius API Key</h2>
+            <div class="api-container-section-first"> <input type="text" id="genius-api-input" placeholder="Enter Genius API Key">
+                <button class="save-api-button" id="save-api-button">Save</button>
+            </div>
+        </div>
+
+        <div class="title-container">
+            <h2 id="website-title" class="title">Loading...</h2>
+        </div>
+
+
     </body>
 
 </html>

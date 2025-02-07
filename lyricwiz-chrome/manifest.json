@@ -3,7 +3,7 @@
   "name": "LyricWiz",
   "version": "1.0",
   "description": "This a Chrome extension that allows users to view the lyrics of the currently playing song. The extension uses the Genius API to fetch the lyrics of the song.",
-  "permissions": ["activeTab", "scripting", "tabs"],
+  "permissions": ["activeTab", "scripting", "tabs", "storage"],
   "background": {
     "service_worker": "src/background.js"
   },
