@@ -4,92 +4,131 @@ document.addEventListener("DOMContentLoaded", async () => {
   const save_api_button = document.getElementById("save-api-button");
   const lyricsElement1 = document.getElementById("lyrics-container-1");
   const lyricsElement2 = document.getElementById("lyrics-container-2");
-  const SongId = document.getElementById("songid-container");
-  const APIKey = "hh4Tf0IbFQ0zyhm7ewxAA-2Z2qLqmyYpmjkHGJAKs_fdPVHz46VtZT4YKYQXbfXF"
+  const songIdElement = document.getElementById("songid-container");
 
-
+  // Retrieve API key from local storage
+  const storedApiKey = localStorage.getItem("genius_api_key");
+  genius_api_input.value = storedApiKey || "hh4Tf0IbFQ0zyhm7ewxAA-2Z2qLqmyYpmjkHGJAKs_fdPVHz46VtZT4YKYQXbfXF";
 
   const fetchLyrics = async (title) => {
-    const genius_api_key = localStorage.getItem("genius_api key");
-    const url = `https://api.genius.com/search?q=${title}`;
+    const genius_api_key = localStorage.getItem("genius_api_key");
+    console.log("Using API Key:", genius_api_key);
+    console.log("Fetching lyrics for title:", title);
 
+    const url = `https://api.genius.com/search?q=${encodeURIComponent(title)}`;
 
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${genius_api_key}`
+        }
+      });
 
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${APIKey}`
-      }
-    });
-
-    const data = await response.json();
-    return data;
-
+      const data = await response.json();
+      console.log("Fetched Lyrics Data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching lyrics:", error);
+      return null;
+    }
   };
 
+  const fetchSongDetails = async (songId) => {
+    const genius_api_key = localStorage.getItem("genius_api_key");
+    const url = `https://api.genius.com/songs/${songId}`;
 
-  save_api_button.addEventListener("click", async () => {
+    console.log("Fetching song details for ID:", songId);
 
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${genius_api_key}`
+        }
+      });
+
+      const data = await response.json();
+      console.log("Fetched Song Details:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching song details:", error);
+      return null;
+    }
+  };
+
+  const scrapeLyricsFromGenius = async (geniusUrl) => {
+    console.log("Fetching Genius page:", geniusUrl);
+
+    try {
+      const response = await fetch(geniusUrl);
+      const htmlText = await response.text();
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, "text/html");
+
+      // Select all divs with the correct class for lyrics
+      const lyricsDivs = doc.querySelectorAll("div.Lyrics-sc-7c7d0940-1.gVRfzh");
+
+      if (lyricsDivs.length === 0) {
+        console.warn("Lyrics not found on Genius page.");
+        return "Lyrics not available.";
+      }
+
+      // Extract text from all found divs and join them with line breaks
+      let lyrics = Array.from(lyricsDivs)
+        .map(div => div.innerText.trim()) // Get text, trim spaces
+        .join("\n\n"); // Add spacing between verses
+
+      return lyrics;
+    } catch (error) {
+      console.error("Error scraping lyrics:", error);
+      return "Failed to load lyrics.";
+    }
+  };
+
+  save_api_button.addEventListener("click", () => {
     localStorage.setItem("genius_api_key", genius_api_input.value);
-
+    console.log("Saved API Key:", genius_api_input.value);
   });
 
-  const fetchSongLyrics = async (songId) => {
-
-    const genius_api_key = localStorage.getItem("genius_api")
-
-    const url = `https://api.genius.com/songs/${songId}`
-
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${APIKey}`
-      }
-    });
-
-    const data = await response.json();
-
-    return data;
-
-  }
-
-
   try {
-    // Get current tab
+    // Get current tab title
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     const title = tab.title || "No title found";
     const cleanTitle = title.split(" - ")[0].trim();
 
     titleElement.innerText = cleanTitle;
-
-    genius_api_input.value = localStorage.getItem("genius_api_key");
+    console.log("Detected song title:", cleanTitle);
 
     const data = await fetchLyrics(cleanTitle);
+    if (!data || !data.response.hits.length) {
+      console.warn("No song found for:", cleanTitle);
+      lyricsElement1.innerHTML = "<p>No lyrics found.</p>";
+      return;
+    }
 
     const songId = data.response.hits[0].result.id;
+    songIdElement.innerText = `Song ID: ${songId}`;
+    console.log("Fetched Song ID:", songId);
 
-    // console.log(lyrics);
+    const songData = await fetchSongDetails(songId);
+    if (!songData || !songData.response.song) {
+      console.warn("Song details not available.");
+      return;
+    }
 
+    const { url: lyricUrl, primary_artist, title: songTitle } = songData.response.song;
+    const songArtist = primary_artist.name;
 
-    SongId.innerText = songId;
+    lyricsElement1.innerHTML = `<h2>${songTitle}</h2> <h3>${songArtist}</h3>`;
+    lyricsElement2.innerHTML = `<a href="${lyricUrl}" target="_blank"> <button>View Lyrics on Genius</button> </a>`;
 
-    const songData = await fetchSongLyrics(songId);
+    console.log("Lyrics URL:", lyricUrl);
 
-    const LyricUrl = songData.response.song.url;
-    const SongArtist = songData.response.song.primary_artist.name;
-    const SongTitle = songData.response.song.title;
-    const SongLyrics = songData.response.song.lyrics;
-
-
-    lyricsElement1.innerHTML = `<h2>${SongTitle}</h2> <h3>${SongArtist}</h3> <p>${SongLyrics}</p>`;
-
-
-    lyricsElement2.innerHTML = `<a href="${LyricUrl}" target="_blank"> <button>View Lyrics</button> </a>`;
-
-
+    // **Scrape lyrics from Genius page**
+    const scrapedLyrics = await scrapeLyricsFromGenius(lyricUrl);
+    lyricsElement1.innerHTML += `<p>${scrapedLyrics.replace(/\n/g, "<br>")}</p>`;
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error in main execution:", error);
   }
-
 });
-
-

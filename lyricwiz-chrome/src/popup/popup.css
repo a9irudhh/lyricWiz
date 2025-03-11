@@ -3,12 +3,19 @@ body {
     padding: 10px;
     text-align: center;
     width: 300px;
+    background-color: #f9f9f9;
 }
 
 h2 {
-    font-size: 16px;
+    font-size: 18px;
     color: #333;
-    margin: 1px;
+    margin: 5px 0;
+}
+
+h3 {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
 }
 
 .title-container {
@@ -16,9 +23,19 @@ h2 {
 }
 
 button {
-    padding: 5px 10px;
+    padding: 8px 12px;
     margin-top: 10px;
     cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
 }
 
 .api-container {
@@ -30,7 +47,7 @@ button {
     align-items: center;
 }
 
-.api-container-section-first{
+.api-container-section-first {
     display: flex;
     gap: 10px;
     flex-direction: row;
@@ -50,4 +67,67 @@ input {
     color: white;
     border: none;
     border-radius: 4px;
+}
+
+.save-api-button:hover {
+    background-color: #388E3C;
+}
+
+/* Styling for lyrics display */
+.lyrics-container {
+    margin-top: 15px;
+    text-align: left;
+    padding: 10px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.lyrics-container p {
+    font-size: 14px;
+    color: #222;
+    line-height: 1.5;
+    white-space: pre-line; /* Ensures line breaks are preserved */
+    text-align: left;
+}
+
+/* Scrollbar styling */
+.lyrics-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lyrics-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.lyrics-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Song info styling */
+.song-info {
+    margin-top: 10px;
+}
+
+.song-info h2, .song-info h3 {
+    text-align: center;
+}
+
+/* View Lyrics button */
+.view-lyrics-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #FF5722;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.view-lyrics-button:hover {
+    background-color: #E64A19;
 }
