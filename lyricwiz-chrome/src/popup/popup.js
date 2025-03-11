@@ -6,7 +6,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const lyricsElement2 = document.getElementById("lyrics-container-2");
   const songIdElement = document.getElementById("songid-container");
 
-  // Retrieve API key from local storage
   const storedApiKey = localStorage.getItem("genius_api_key");
   genius_api_input.value = storedApiKey || "hh4Tf0IbFQ0zyhm7ewxAA-2Z2qLqmyYpmjkHGJAKs_fdPVHz46VtZT4YKYQXbfXF";
 
