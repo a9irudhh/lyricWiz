@@ -10,6 +10,7 @@ LyricWiz is a Chrome extension that automatically detects songs from your browse
 ![LyricWiz Demo](images/image(2).png)
 ![LyricWiz Demo](images/image(3).png)
 ![LyricWiz Demo](images/image(4).png)
+![LyricWiz Demo](images/image(5).png)
 
 
 
