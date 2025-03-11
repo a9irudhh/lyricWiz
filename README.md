@@ -6,10 +6,10 @@ A beautiful Chrome extension that instantly fetches and displays lyrics for song
 
 LyricWiz is a Chrome extension that automatically detects songs from your browser's tab title and displays their lyrics in a beautifully animated interface. Using the Genius API, it finds song details and displays formatted lyrics right in your browser.
 
-![LyricWiz Demo](images\image(1).png)
-![LyricWiz Demo](images\image(2).png)
-![LyricWiz Demo](images\image(3).png)
-![LyricWiz Demo](images\image(4).png)
+![LyricWiz Demo](images/image(1).png)
+![LyricWiz Demo](images/image(2).png)
+![LyricWiz Demo](images/image(3).png)
+![LyricWiz Demo](images/image(4).png)
 
 
 
