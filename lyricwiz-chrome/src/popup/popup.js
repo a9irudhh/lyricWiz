@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Retrieve API key from local storage
   const storedApiKey = localStorage.getItem("genius_api_key");
-  genius_api_input.value = storedApiKey || "hh4Tf0IbFQ0zyhm7ewxAA-2Z2qLqmyYpmjkHGJAKs_fdPVHz46VtZT4YKYQXbfXF";
+  genius_api_input.value = storedApiKey || "";
 
   const fetchLyrics = async (title) => {
     const genius_api_key = localStorage.getItem("genius_api_key");
