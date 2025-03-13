@@ -59,33 +59,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Fetching Genius page:", geniusUrl);
 
     try {
-      const response = await fetch(geniusUrl);
-      const htmlText = await response.text();
+        const response = await fetch(geniusUrl);
+        const htmlText = await response.text();
 
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlText, "text/html");
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, "text/html");
 
-      // Select all divs with the correct class for lyrics
-      const lyricsDivs = doc.querySelectorAll("div.Lyrics-sc-7c7d0940-1.gVRfzh");
+        const lyricsDiv = doc.querySelector('div[data-lyrics-container="true"]');
 
-      if (lyricsDivs.length === 0) {
-        console.warn("Lyrics not found on Genius page.");
-        return "Lyrics not available.";
-      }
+        if (!lyricsDiv) {
+            console.warn("Lyrics not found on Genius page.");
+            return "Lyrics not available.";
+        }
 
-      // Extract text from all found divs and join them with line breaks
-      let lyrics = Array.from(lyricsDivs)
-        .map(div => div.innerText.trim()) // Get text, trim spaces
-        .join("\n\n"); // Add spacing between verses
-
-      return lyrics;
+        return lyricsDiv.innerText.trim();
     } catch (error) {
-      console.error("Error scraping lyrics:", error);
-      return "Failed to load lyrics.";
+        console.error("Error scraping lyrics:", error);
+        return "Failed to load lyrics.";
     }
-  };
+};
 
-  // Add ripple effect to save button
   save_api_button.addEventListener('mousedown', function (e) {
     const rect = this.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -106,7 +99,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     localStorage.setItem("genius_api_key", genius_api_input.value);
     console.log("Saved API Key:", genius_api_input.value);
 
-    // Add a success animation to the button
     save_api_button.classList.add('saved');
     setTimeout(() => {
       save_api_button.classList.remove('saved');
@@ -153,7 +145,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { url: lyricUrl, primary_artist, title: songTitle } = songData.response.song;
     const songArtist = primary_artist.name;
 
-    // Add song header with animated elements
     lyricsElement1.innerHTML = `
       <div class="song-header">
         <h2 class="song-title">${songTitle}</h2>
@@ -161,7 +152,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>
     `;
 
-    // Show loading indicator for lyrics
     lyricsElement1.innerHTML += `<div class="lyrics-content loading"></div>`;
 
     // Add genius button with animation classes
@@ -176,29 +166,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Scrape lyrics from Genius page
     const scrapedLyrics = await scrapeLyricsFromGenius(lyricUrl);
 
-    // Format the lyrics with proper spacing for rhythm
 
     const formattedLyrics = scrapedLyrics
-      .replace(/\n\n/g, "<br><br><br>")  // Double line breaks for verse separation
-      .replace(/, /g, ",<br><br>")       // New line after commas
-      .replace(/\. /g, ".<br><br>")      // New line after periods
-      .replace(/\n/g, "<br><br>");       // Single line breaks
+      .replace(/\n\n/g, "<br><br>")  // Double line breaks for verse separation
+      .replace(/, /g, ",<br><br><br>")       // New line after commas
+      .replace(/\. /g, ".<br><br><br>")      // New line after periods
+      .replace(/\n/g, "<br><br><br>");       // Single line breaks
 
-    // Replace loading state with actual lyrics
     const lyricsContent = lyricsElement1.querySelector('.lyrics-content');
 
     titleElement.innerText = "🎶LyricWiz🎵";
 
-
-    // Small delay to allow loading animation to complete
     setTimeout(() => {
       lyricsContent.classList.remove('loading');
       lyricsContent.innerHTML = formattedLyrics;
-
-      // Add animation to show lyrics appearing
       lyricsContent.classList.add('lyrics-reveal');
 
-      // Add music note decorations to the lyrics
       addMusicNoteDecorations(lyricsContent);
     }, 800);
 
@@ -213,7 +196,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  // Function to add floating music note decorations
   function addMusicNoteDecorations(lyricsContainer) {
     const musicNotes = ['♪', '♫', '🎵', '🎶'];
     const numNotes = 3;
@@ -223,7 +205,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       note.textContent = musicNotes[Math.floor(Math.random() * musicNotes.length)];
       note.classList.add('floating-music-note');
 
-      // Random positioning
       note.style.top = `${10 + Math.random() * 80}%`;
       note.style.right = `${5 + Math.random() * 15}%`;
       note.style.animationDelay = `${i * 0.5}s`;
