@@ -10,6 +10,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   const storedApiKey = localStorage.getItem("genius_api_key");
   genius_api_input.value = storedApiKey || "";
 
+  // Song selection memory
+  const getSavedSongSelection = (query) => {
+    const selections = JSON.parse(localStorage.getItem('song_selections') || '{}');
+    return selections[query];
+  };
+
+
+  // This function saves the song selection to local storage so that the user can view the same song lyrics later
+  // DELETE THIS IF MEMORY CONCERNS
+  const saveSongSelection = (query, songId) => {
+    const selections = JSON.parse(localStorage.getItem('song_selections') || '{}');
+    selections[query] = songId;
+    localStorage.setItem('song_selections', JSON.stringify(selections));
+  };
+
   const fetchLyrics = async (title) => {
     const genius_api_key = localStorage.getItem("genius_api_key");
     console.log("Using API Key:", genius_api_key);
@@ -59,25 +74,115 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Fetching Genius page:", geniusUrl);
 
     try {
-        const response = await fetch(geniusUrl);
-        const htmlText = await response.text();
+      const response = await fetch(geniusUrl);
+      const htmlText = await response.text();
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, "text/html");
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, "text/html");
 
-        const lyricsDiv = doc.querySelector('div[data-lyrics-container="true"]');
+      const lyricsDiv = doc.querySelector('div[data-lyrics-container="true"]');
 
-        if (!lyricsDiv) {
-            console.warn("Lyrics not found on Genius page.");
-            return "Lyrics not available.";
-        }
+      if (!lyricsDiv) {
+        console.warn("Lyrics not found on Genius page.");
+        return "Lyrics not available.";
+      }
 
-        return lyricsDiv.innerText.trim();
+      return lyricsDiv.innerText.trim();
     } catch (error) {
-        console.error("Error scraping lyrics:", error);
-        return "Failed to load lyrics.";
+      console.error("Error scraping lyrics:", error);
+      return "Failed to load lyrics.";
     }
-};
+  };
+
+  const displaySongLyrics = async (songId, data, cleanTitle) => {
+    songIdElement.innerHTML = `<span class="song-id-label">Song ID:</span> ${songId}`;
+    songIdElement.classList.add('song-id-animate');
+
+    // Save this selection to memory
+    if (cleanTitle) {
+      saveSongSelection(cleanTitle, songId);
+    }
+
+    console.log("Selected Song ID:", songId);
+
+    const songData = await fetchSongDetails(songId);
+    if (!songData || !songData.response.song) {
+      console.warn("Song details not available.");
+      lyricsElement1.innerHTML = `
+        <div class="error-message">
+          <span class="error-icon">❌</span>
+          <p>Couldn't retrieve song details.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const { url: lyricUrl, primary_artist, title: songTitle } = songData.response.song;
+    const songArtist = primary_artist.name;
+
+    // Create song selector dropdown if we have multiple options
+    let selectorHtml = '';
+    if (data && data.response.hits.length > 1) {
+      selectorHtml = `
+        <div class="song-selector-container">
+          <select id="song-selector" class="song-selector">
+            ${data.response.hits.map(hit => `
+              <option value="${hit.result.id}" ${hit.result.id == songId ? 'selected' : ''}>
+                ${hit.result.title} - ${hit.result.primary_artist.name}
+              </option>
+            `).join('')}
+          </select>
+        </div>
+      `;
+    }
+
+    lyricsElement1.innerHTML = `
+      <div class="song-header">
+        <h2 class="song-title">${songTitle}</h2>
+        <h3 class="song-artist">by ${songArtist}</h3>
+        ${selectorHtml}
+      </div>
+      <div class="lyrics-content loading"></div>
+    `;
+
+    lyricsElement2.innerHTML = `
+      <a href="${lyricUrl}" target="_blank" class="genius-link"> 
+        <button class="genius-button">View on Genius</button> 
+      </a>
+    `;
+
+    // Add event listener to the selector if it exists
+    const songSelector = document.getElementById("song-selector");
+    if (songSelector) {
+      songSelector.addEventListener('change', (e) => {
+        const selectedSongId = e.target.value;
+        if (selectedSongId !== songId) {
+          lyricsElement1.querySelector('.lyrics-content').innerHTML = '<div class="lyrics-loading">Loading selected lyrics...</div>';
+          displaySongLyrics(selectedSongId, data, cleanTitle);
+        }
+      });
+    }
+
+    console.log("Lyrics URL:", lyricUrl);
+
+    // Scrape lyrics from Genius page
+    const scrapedLyrics = await scrapeLyricsFromGenius(lyricUrl);
+    const formattedLyrics = scrapedLyrics
+      .replace(/\n\n/g, "<br><br>")  // Double line breaks for verse separation
+      .replace(/, /g, ",<br><br><br>")  // New line after commas
+      .replace(/\. /g, ".<br><br><br>")  // New line after periods
+      .replace(/\n/g, "<br><br><br>");  // Single line breaks
+
+    const lyricsContent = lyricsElement1.querySelector('.lyrics-content');
+    titleElement.innerText = "🎶LyricWiz🎵";
+
+    setTimeout(() => {
+      lyricsContent.classList.remove('loading');
+      lyricsContent.innerHTML = formattedLyrics;
+      lyricsContent.classList.add('lyrics-reveal');
+      addMusicNoteDecorations(lyricsContent);
+    }, 800);
+  };
 
   save_api_button.addEventListener('mousedown', function (e) {
     const rect = this.getBoundingClientRect();
@@ -131,59 +236,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    const songId = data.response.hits[0].result.id;
-    songIdElement.innerHTML = `<span class="song-id-label">Song ID:</span> ${songId}`;
-    songIdElement.classList.add('song-id-animate');
-    console.log("Fetched Song ID:", songId);
+    // Check if we have a saved selection for this search
+    const savedSongId = getSavedSongSelection(cleanTitle);
+    const songId = savedSongId || data.response.hits[0].result.id;
 
-    const songData = await fetchSongDetails(songId);
-    if (!songData || !songData.response.song) {
-      console.warn("Song details not available.");
-      return;
-    }
-
-    const { url: lyricUrl, primary_artist, title: songTitle } = songData.response.song;
-    const songArtist = primary_artist.name;
-
-    lyricsElement1.innerHTML = `
-      <div class="song-header">
-        <h2 class="song-title">${songTitle}</h2>
-        <h3 class="song-artist">by ${songArtist}</h3>
-      </div>
-    `;
-
-    lyricsElement1.innerHTML += `<div class="lyrics-content loading"></div>`;
-
-    // Add genius button with animation classes
-    lyricsElement2.innerHTML = `
-      <a href="${lyricUrl}" target="_blank" class="genius-link"> 
-        <button class="genius-button">View on Genius</button> 
-      </a>
-    `;
-
-    console.log("Lyrics URL:", lyricUrl);
-
-    // Scrape lyrics from Genius page
-    const scrapedLyrics = await scrapeLyricsFromGenius(lyricUrl);
-
-
-    const formattedLyrics = scrapedLyrics
-      .replace(/\n\n/g, "<br><br>")  // Double line breaks for verse separation
-      .replace(/, /g, ",<br><br><br>")       // New line after commas
-      .replace(/\. /g, ".<br><br><br>")      // New line after periods
-      .replace(/\n/g, "<br><br><br>");       // Single line breaks
-
-    const lyricsContent = lyricsElement1.querySelector('.lyrics-content');
-
-    titleElement.innerText = "🎶LyricWiz🎵";
-
-    setTimeout(() => {
-      lyricsContent.classList.remove('loading');
-      lyricsContent.innerHTML = formattedLyrics;
-      lyricsContent.classList.add('lyrics-reveal');
-
-      addMusicNoteDecorations(lyricsContent);
-    }, 800);
+    // Display the selected song lyrics
+    displaySongLyrics(songId, data, cleanTitle);
 
   } catch (error) {
     console.error("Error in main execution:", error);

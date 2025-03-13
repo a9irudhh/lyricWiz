@@ -644,3 +644,185 @@ body {
         transform: translateY(0) rotate(0);
     }
 }
+
+
+.lyrics-loading {
+    text-align: center;
+    padding: 20px;
+    color: #6364FF;
+    font-style: italic;
+}
+
+.song-selector-container {
+    margin: 16px 0;
+    position: relative;
+    animation: fadeSlideIn 0.6s ease-out both;
+    border-radius: var(--border-radius);
+    background: linear-gradient(145deg, rgba(240, 247, 255, 0.7), rgba(255, 255, 255, 0.9));
+    padding: 12px 14px;
+    box-shadow: 0 3px 8px rgba(41, 98, 255, 0.08);
+    border-left: 3px solid var(--secondary-color);
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.song-selector-container::before {
+    content: 'Select a different version:';
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    opacity: 0.85;
+    letter-spacing: 0.3px;
+}
+
+.song-selector {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(99, 100, 255, 0.3);
+    font-size: 13px;
+    font-weight: 500;
+    background-color: white;
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236364FF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.song-selector:hover {
+    border-color: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(99, 100, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.song-selector:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(99, 100, 255, 0.25);
+    transform: scale(1.01);
+    animation: subtle-pulse 1.5s infinite;
+}
+
+@keyframes subtle-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(99, 100, 255, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 4px rgba(99, 100, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(99, 100, 255, 0);
+    }
+}
+
+.song-selector-container::after {
+    content: '🎵';
+    position: absolute;
+    right: -5px;
+    top: -8px;
+    font-size: 16px;
+    opacity: 0.7;
+    animation: float-small 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes float-small {
+    0% {
+        transform: translateY(0) rotate(0);
+    }
+
+    50% {
+        transform: translateY(-5px) rotate(10deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(0);
+    }
+}
+
+.song-selector option {
+    padding: 10px;
+    font-weight: 400;
+    background-color: white;
+    color: var(--text-primary);
+}
+
+.song-selector option:checked {
+    background-color: var(--secondary-color);
+    color: white;
+    font-weight: 500;
+}
+
+.song-selector option:hover {
+    background-color: var(--accent-color);
+}
+
+/* Create visual separation between options */
+.song-selector optgroup {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--primary-color);
+    background-color: #f8f9ff;
+}
+
+/* Fix for Firefox dropdown styling */
+@-moz-document url-prefix() {
+    .song-selector {
+        color: var(--text-primary);
+        padding-right: 25px;
+    }
+
+    .song-selector option {
+        background-color: white;
+    }
+}
+
+/* Animation when selecting a new song */
+.lyrics-loading {
+    text-align: center;
+    padding: 25px;
+    color: var(--primary-color);
+    font-style: italic;
+    position: relative;
+    animation: fadeIn 0.3s ease;
+}
+
+.lyrics-loading::before {
+    content: "♪";
+    display: block;
+    font-size: 24px;
+    margin-bottom: 10px;
+    animation: bounce-rotate 1.5s infinite;
+}
+
+@keyframes bounce-rotate {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0);
+    }
+
+    50% {
+        transform: translateY(-10px) rotate(15deg);
+    }
+}
